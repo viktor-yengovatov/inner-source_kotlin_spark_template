@@ -1,7 +1,8 @@
 package com.home.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.home.domain.DataRepository
+import com.home.api
+import com.home.domain.Repository
 import com.home.dto.Aggregate
 import com.home.dto.Data
 import com.home.integration.RemoteDataClient
@@ -13,10 +14,10 @@ import java.util.*
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 
-class Controller(private val objectMapper: ObjectMapper,
-                 private val executorService: ExecutorService,
-                 private val remoteDataClient: RemoteDataClient,
-                 private val dataRepository: DataRepository) {
+class Controller(val repository: Repository,
+                 val objectMapper: ObjectMapper = api().objectMapper,
+                 val remoteDataClient: RemoteDataClient = api().remoteDataClient,
+                 val executorService: ExecutorService = api().executorService) {
 
     private fun tryParseId(request: Request): Long? = request.params("id").toLongOrNull()
 
@@ -33,7 +34,7 @@ class Controller(private val objectMapper: ObjectMapper,
         return this.readOrDelete(
                 request,
                 response,
-                { id: Long -> dataRepository.read(id) }
+                { id: Long -> repository.read(id) }
         )
     }
 
@@ -41,7 +42,7 @@ class Controller(private val objectMapper: ObjectMapper,
         return this.readOrDelete(
                 request,
                 response,
-                { id: Long -> dataRepository.delete(id) }
+                { id: Long -> repository.delete(id) }
         )
     }
 
@@ -51,7 +52,7 @@ class Controller(private val objectMapper: ObjectMapper,
         val body = request.body()
         val data = objectMapper.readValue(body, Data::class.java)
 
-        dataRepository.create(data)
+        repository.create(data)
         response.status(201)
         return data
     }
@@ -66,10 +67,10 @@ class Controller(private val objectMapper: ObjectMapper,
             Spark.halt(400)
         }
 
-        val old = dataRepository.read(id)
+        val old = repository.read(id)
         val status = if (old != null) 201 else 200
 
-        dataRepository.update(data)
+        repository.update(data)
         response.status(status)
         return data
     }
