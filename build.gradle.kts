@@ -27,6 +27,11 @@ dependencies {
     compile(group = "com.fasterxml.jackson.module", name = "jackson-module-parameter-names", version = "2.9.5")
     compile(group = "org.slf4j", name = "slf4j-simple", version = "1.7.25")
 
+    compile("com.h2database:h2:1.4.197")
+    compile("org.jooq:jooq:3.10.7")
+    compile("org.jooq:jooq-meta:3.10.7")
+    compile("org.jooq:jooq-codegen:3.10.7")
+
     testCompile(group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = kotlinVersion)
     testImplementation(group = "org.junit", name = "junit-bom", version = junitVersion)
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api")

@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import com.home.integration.DataService
 import com.home.integration.RemoteDataClient
+import org.h2.jdbcx.JdbcDataSource
+import org.jooq.DSLContext
+import org.jooq.impl.DSL
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
+import java.sql.Connection
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -18,6 +22,7 @@ interface Context {
     val executorService: ExecutorService
     val objectMapper: ObjectMapper
     val remoteDataClient: RemoteDataClient
+    val jooqContext: DSLContext
 }
 
 /**
@@ -37,4 +42,16 @@ object RunContext : Context {
     val dataService: DataService = retrofit.create(DataService::class.java)
 
     override val remoteDataClient: RemoteDataClient = RemoteDataClient(dataService)
+
+    val dbConnection: Connection
+        get() {
+            val jdbcDataSource: JdbcDataSource = JdbcDataSource()
+            jdbcDataSource.setURL("jdbc:h2:mem:")
+            jdbcDataSource.user = "sa"
+            jdbcDataSource.password = "sa"
+
+            return jdbcDataSource.connection
+        }
+
+    override val jooqContext: DSLContext = DSL.using(dbConnection)
 }
